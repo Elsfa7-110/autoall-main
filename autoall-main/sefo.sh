@@ -74,7 +74,7 @@ dalfox file $1/xssPatterns.txt pipe --silence --no-color --no-spinner --mass --m
 
 echo -e "BLINDER \n"
 
-python3 Blinder.py -u saad -f $1/parameters.txt -r deny
+python3 Blinder.py -u saad -f $1-alive-subs.txt -r deny
 
 echo -e "handle it \n"
 
