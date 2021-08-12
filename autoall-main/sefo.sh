@@ -40,10 +40,7 @@ crlfuzz -l $1-alive-subs.txt -s -c 1000 |tee crlfuzz.txt
 #------------------------------------------------#
 echo -e "[+] Finish CRLFUZZ And Found *$(wc -l < crlfuzz.txt)*"
 #------------------------------------------------#
-echo -e "[+] Start nuclei [+]"
-#------------------------------------------------#
 nuclei -update-templates
-nuclei -l $1-alive-subs.txt -t /root/nuclei-templates -c 700 -severity critical,high,medium,low
 #------------------------------------------------#
 httpx -l $1-alive-subs.txt -path /sm/login/loginpagecontentgrabber.do -threads 500 -random-agent -x GET,POST,PUT -title -tech-detect -status-code  -follow-redirects -title -mc 500
 #------------------------------------------------#
