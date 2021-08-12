@@ -127,7 +127,6 @@ sqlmap -m $1/sqliPatterns.txt --batch --random-agent --level 1 --threads=5
 sqlmap -m $1-alive-subs.txt --batch --random-agent --level 1 --crawl=5 --forms --threads=5
 
 python3 dirsearch/dirsearch.py -l $1-alive-subs.txt -i 200 -t 300
-python3 dirsearch/dirsearch.py -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,conf,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,old,sql,sql.gz,sql.zip,sql.tar.gz,sql~,swp,swp~,tar,tar.bz2,tar.gz,txt,wadl,zip,log,xml,js,json  -l $1-alive-subs.txt -t 300 -i 200
 
 echo -e "SHODAN \n"
 
@@ -135,7 +134,7 @@ shodan search ssl:"$1"  --fields ip_str,port --separator " " | awk '{print $1":"
 
 python3 jexboss/jexboss.py -mode file-scan -file $1test
 
-python3 dirsearch/dirsearch.py -l $1test
+python3 dirsearch/dirsearch.py -l $1test -t 300
 
 sqlmap -m $1test --batch --random-agent --crawl=5 --forms --threads=5
 
