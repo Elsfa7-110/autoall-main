@@ -132,7 +132,7 @@ echo -e "SHODAN \n"
 
 shodan search ssl:"$1"  --fields ip_str,port --separator " " | awk '{print $1":"$2}' | httpx -silent -threads 300 -o $1test
 
-python3 dirsearch/dirsearch.py -l $1test -t 300 -o $1/dirsearch0.txt
+python3 dirsearch/dirsearch.py -l $1test -t 300 -i 200 -o $1/dirsearch0.txt
 
 sqlmap -m $1test --batch --random-agent --crawl=5 --forms --threads=5
 
